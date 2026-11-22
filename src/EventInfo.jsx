@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react'
+
 // Party details + a stylized night-city map of the venue.
 export const EVENT = {
   date: 'SUN · DEC 6, 2026',
@@ -6,6 +8,37 @@ export const EVENT = {
   address: 'GF Terraces, Ayala Center Cebu, Cebu City 6000',
   maps: 'https://www.google.com/maps/search/?api=1&query=Chamber+KTV+Ayala+Center+Cebu',
   directions: 'https://www.google.com/maps/dir/?api=1&destination=Chamber+KTV+Ayala+Center+Cebu',
+  // Philippine time (UTC+8), so every viewer counts down to the same moment.
+  start: Date.parse('2026-12-06T22:00:00+08:00'),
+  end: Date.parse('2026-12-07T01:00:00+08:00'),
+}
+
+// Pure so it can be checked without a clock: returns the phase and the d/h/m/s left.
+export function countdown(now) {
+  if (now >= EVENT.end) return { phase: 'over' }
+  if (now >= EVENT.start) return { phase: 'live' }
+  const s = Math.floor((EVENT.start - now) / 1000)
+  return { phase: 'soon', d: Math.floor(s / 86400), h: Math.floor(s / 3600) % 24, m: Math.floor(s / 60) % 60, s: s % 60 }
+}
+
+function Countdown() {
+  const [now, setNow] = useState(Date.now)
+  const c = countdown(now)
+  useEffect(() => {
+    if (c.phase === 'over') return
+    const id = setInterval(() => setNow(Date.now()), 1000)
+    return () => clearInterval(id)
+  }, [c.phase])
+  if (c.phase === 'over') return <div className="countdown done">THANKS FOR PARTYING · SEE YOU NEXT YEAR</div>
+  if (c.phase === 'live') return <div className="countdown live-now">● THE PARTY IS LIVE NOW</div>
+  const pad = (n) => String(n).padStart(2, '0')
+  return (
+    <div className="countdown" role="timer" aria-label={`${c.d} days ${c.h} hours ${c.m} minutes until the party`}>
+      {[[c.d, 'DAYS'], [pad(c.h), 'HRS'], [pad(c.m), 'MIN'], [pad(c.s), 'SEC']].map(([v, u]) => (
+        <span key={u}><b>{v}</b><small>{u}</small></span>
+      ))}
+    </div>
+  )
 }
 
 export function EventInfo() {
@@ -107,6 +140,7 @@ export function VenueTitle() {
       <span className="vt-kicker">PA CEBU LEADERSHIP · YEAR END PARTY</span>
       <h1>CHAMBER KTV</h1>
       <span className="vt-sub">THE TERRACES · AYALA CENTER CEBU · DEC 6 · 10PM–1AM</span>
+      <Countdown />
     </header>
   )
 }
