@@ -18,18 +18,19 @@ const realtime = createRealtime({
 })
 
 export type Rsvp = { id: string; name: string; department: string; guests: number; created_at: string }
-const guestList = rawSql<Rsvp>(
-  `SELECT id, name, department, guests, created_at FROM rsvps ORDER BY created_at DESC LIMIT 500`,
-)
+const LIST_SQL = `SELECT id, name, department, guests, created_at FROM rsvps ORDER BY created_at DESC LIMIT 500`
+const guestList = rawSql<Rsvp>(LIST_SQL)
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const str = (v: unknown, max: number) => (typeof v === "string" ? v.trim().slice(0, max) : "")
 
 const app = new Hono()
 // Public event page: no cookies or credentials are used, so any origin may call it.
-app.use("*", cors({ origin: "*", allowMethods: ["POST", "OPTIONS"], allowHeaders: ["Content-Type"] }))
+app.use("*", cors({ origin: "*", allowMethods: ["GET", "POST", "OPTIONS"], allowHeaders: ["Content-Type"] }))
 
 app.post("/live", async (c) => c.json(await realtime.seal({ query: guestList })))
+// Plain snapshot for pages whose origin Realtime does not allow (e.g. Vercel preview URLs).
+app.get("/list", async (c) => c.json((await pool.query(LIST_SQL)).rows))
 
 app.post("/rsvp", async (c) => {
   const body = await c.req.json().catch(() => null)

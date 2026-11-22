@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createRealtimeClient } from '@neon/realtime/client'
 import { RealtimeProvider, useLiveQuery } from '@neon/realtime-react'
 import { EventInfo, EVENT } from './EventInfo.jsx'
@@ -18,11 +18,13 @@ export function RsvpProvider({ children }) {
   return client ? <RealtimeProvider client={client}>{children}</RealtimeProvider> : children
 }
 
-// Live guest list + stats. Rows arrive over Neon Realtime as soon as anyone registers.
+// Guest list + stats. Live over Neon Realtime when this page's origin is allowed;
+// otherwise (e.g. Vercel preview URLs) it falls back to polling the function.
 export function GuestPanel({ open, onClose, onRsvp }) {
   const [sealed, setSealed] = useState(null)
-  const [error, setError] = useState('')
-  useEffect(() => { fetchSealed().then(setSealed, (e) => setError(e.message)) }, [])
+  const [polling, setPolling] = useState(false)
+  const fallBack = useCallback(() => setPolling(true), [])
+  useEffect(() => { fetchSealed().then(setSealed, fallBack) }, [fallBack])
   if (!rsvpEnabled) return null
   return (
     <aside className={`guests${open ? ' open' : ''}`} aria-label="RSVP guest list">
@@ -32,15 +34,35 @@ export function GuestPanel({ open, onClose, onRsvp }) {
       </div>
       <EventInfo />
       <button className="primary wide" onClick={onRsvp}>RSVP NOW</button>
-      {sealed ? <GuestList sealed={sealed} /> : <p className="muted">{error || 'Loading guest list…'}</p>}
+      {polling ? <PolledList /> : sealed ? <LiveList sealed={sealed} onFail={fallBack} /> : <p className="muted">Loading guest list…</p>}
     </aside>
   )
 }
 
-function GuestList({ sealed }) {
-  const { data, status, error } = useLiveQuery(sealed, { refreshQuery: fetchSealed })
+function LiveList({ sealed, onFail }) {
+  const { data, status } = useLiveQuery(sealed, { refreshQuery: fetchSealed })
+  useEffect(() => { if (status === 'error') onFail() }, [status, onFail])
+  // A refused origin can leave the subscription waiting instead of erroring.
+  useEffect(() => { if (data === undefined) { const id = setTimeout(onFail, 8000); return () => clearTimeout(id) } }, [data, onFail])
+  if (data === undefined) return <p className="muted">Loading guest list…</p>
+  return <Guests rows={data} live />
+}
+
+function PolledList() {
+  const [rows, setRows] = useState()
+  useEffect(() => {
+    const load = () => fetch(`${API}/list`).then((r) => (r.ok ? r.json() : Promise.reject())).then(setRows, () => {})
+    load()
+    const id = setInterval(load, 10000)
+    window.addEventListener('rsvp:saved', load)
+    return () => { clearInterval(id); window.removeEventListener('rsvp:saved', load) }
+  }, [])
+  if (rows === undefined) return <p className="muted">Loading guest list…</p>
+  return <Guests rows={rows} />
+}
+
+function Guests({ rows, live }) {
   const stats = useMemo(() => {
-    const rows = data ?? []
     const depts = {}
     for (const r of rows) { const d = r.department || 'Other'; depts[d] = (depts[d] ?? 0) + 1 + r.guests }
     return {
@@ -48,9 +70,7 @@ function GuestList({ sealed }) {
       heads: rows.reduce((n, r) => n + 1 + r.guests, 0),
       depts: Object.entries(depts).sort((a, b) => b[1] - a[1]),
     }
-  }, [data])
-  if (status === 'error') return <p className="muted" role="alert">Live updates stopped: {error.message}</p>
-  if (data === undefined) return <p className="muted">Loading guest list…</p>
+  }, [rows])
   return (
     <>
       <div className="stats">
@@ -65,10 +85,10 @@ function GuestList({ sealed }) {
           ))}
         </ul>
       )}
-      <h3>GUESTS <span className="live">● LIVE</span></h3>
-      {data.length === 0 && <p className="muted">No RSVPs yet. Be the first!</p>}
+      <h3>GUESTS {live && <span className="live">● LIVE</span>}</h3>
+      {rows.length === 0 && <p className="muted">No RSVPs yet. Be the first!</p>}
       <ul className="names">
-        {data.map((r) => (
+        {rows.map((r) => (
           <li key={r.id}>
             <span>{r.name}{r.guests > 0 && <em> +{r.guests}</em>}</span>
             <small>{r.department}</small>
@@ -93,6 +113,7 @@ export function RsvpForm({ onClose }) {
       })
       const body = await r.json().catch(() => ({}))
       if (!r.ok) throw new Error(body.error || `Could not save your RSVP (${r.status})`)
+      window.dispatchEvent(new Event('rsvp:saved'))
       setState({ status: 'done', message: body.created ? "You're on the list. See you at the party!" : 'Your RSVP was updated.' })
     } catch (err) {
       setState({ status: 'idle', message: err.message })
