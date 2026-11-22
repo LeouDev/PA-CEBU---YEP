@@ -20,7 +20,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet" />
     <style>
       /* Venue title: slanted heavy type with a sunset gradient */
-      .venue-title { position: fixed; left: 22px; top: 14px; z-index: 12; pointer-events: none; display: flex; flex-direction: column; align-items: flex-start; }
+      .venue-title { position: fixed; left: 22px; top: 14px; z-index: 9; /* below .overlay (10) so pop-ups always cover it */ pointer-events: none; display: flex; flex-direction: column; align-items: flex-start; }
       .venue-title h1 { margin: 2px 0 0; font: 400 58px/.95 Anton, Impact, sans-serif; letter-spacing: .02em; transform: skewX(-10deg); transform-origin: left bottom;
         background: linear-gradient(180deg, #ffe36e 0%, #ffb14a 40%, #ff4f8b 75%, #c23bff 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
         filter: drop-shadow(3px 3px 0 #1a0828) drop-shadow(0 0 16px rgba(255,47,142,.45)); }
