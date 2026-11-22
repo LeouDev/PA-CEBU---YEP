@@ -4,18 +4,34 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>PA Cebu Leadership Year End Party · Register Now</title>
-    <meta name="description" content="Sun, Dec 6, 2026 · 10 PM – 1 AM at The Terraces, Ayala Center Cebu. Walk through the venue in 3D and RSVP." />
+    <meta name="description" content="Sun, Dec 6, 2026 · 10 PM – 1 AM at Chamber KTV, The Terraces, Ayala Center Cebu. Walk through the venue in 3D and RSVP." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://pa-cebu-yep.vercel.app/" />
     <meta property="og:title" content="PA Cebu Leadership Year End Party · Register Now" />
-    <meta property="og:description" content="Sun, Dec 6, 2026 · 10 PM – 1 AM at The Terraces, Ayala Center Cebu. Walk through the venue in 3D and RSVP." />
+    <meta property="og:description" content="Sun, Dec 6, 2026 · 10 PM – 1 AM at Chamber KTV, The Terraces, Ayala Center Cebu. Walk through the venue in 3D and RSVP." />
     <meta property="og:image" content="https://pa-cebu-yep.vercel.app/og.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="PA Cebu Leadership Year End Party, Dec 6 2026, 10 PM to 1 AM, The Terraces Ayala Center Cebu. Register now." />
+    <meta property="og:image:alt" content="PA Cebu Leadership Year End Party, Dec 6 2026, 10 PM to 1 AM, Chamber KTV, The Terraces Ayala Center Cebu. Register now." />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content="https://pa-cebu-yep.vercel.app/og.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet" />
     <style>
+      /* Venue title: slanted heavy type with a sunset gradient */
+      .venue-title { position: fixed; left: 22px; top: 14px; z-index: 12; pointer-events: none; display: flex; flex-direction: column; align-items: flex-start; }
+      .venue-title h1 { margin: 2px 0 0; font: 400 58px/.95 Anton, Impact, sans-serif; letter-spacing: .02em; transform: skewX(-10deg); transform-origin: left bottom;
+        background: linear-gradient(180deg, #ffe36e 0%, #ffb14a 40%, #ff4f8b 75%, #c23bff 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
+        filter: drop-shadow(3px 3px 0 #1a0828) drop-shadow(0 0 16px rgba(255,47,142,.45)); }
+      .vt-kicker, .vt-sub { font: 700 11px/1.3 ui-monospace, Menlo, monospace; letter-spacing: .22em; color: #ffd3a1; text-shadow: 0 1px 6px rgba(0,0,0,.9); }
+      .vt-sub { margin-top: 4px; color: #ff9ccc; letter-spacing: .14em; font-size: 10px; }
+      @media (max-width: 760px), (pointer: coarse) {
+        .venue-title { left: 12px; top: 92px; }
+        .venue-title h1 { font-size: 40px; }
+        .vt-kicker { font-size: 9px; }
+        .vt-sub { font-size: 8.5px; }
+      }
       html, body, #root { margin: 0; height: 100%; background: #0b0b0c; overflow: hidden; }
       body { font-family: ui-monospace, Menlo, monospace; color: #eee; }
       .overlay { position: fixed; inset: 0; display: grid; place-items: center; background: rgba(8,8,10,.62); backdrop-filter: blur(3px); z-index: 10; }

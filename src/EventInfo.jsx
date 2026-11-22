@@ -2,10 +2,10 @@
 export const EVENT = {
   date: 'SUN · DEC 6, 2026',
   time: '10:00 PM – 1:00 AM',
-  venue: 'The Terraces, Ayala Center Cebu',
+  venue: 'Chamber KTV',
   address: 'GF Terraces, Ayala Center Cebu, Cebu City 6000',
-  maps: 'https://www.google.com/maps/search/?api=1&query=The+Terraces+Ayala+Center+Cebu',
-  directions: 'https://www.google.com/maps/dir/?api=1&destination=The+Terraces+Ayala+Center+Cebu',
+  maps: 'https://www.google.com/maps/search/?api=1&query=Chamber+KTV+Ayala+Center+Cebu',
+  directions: 'https://www.google.com/maps/dir/?api=1&destination=Chamber+KTV+Ayala+Center+Cebu',
 }
 
 export function EventInfo() {
@@ -30,7 +30,7 @@ export function EventInfo() {
 function VenueMap() {
   const label = { fontFamily: 'Impact, "Arial Narrow", sans-serif', fontStyle: 'italic', letterSpacing: '.06em' }
   return (
-    <svg viewBox="0 0 270 190" role="img" aria-label="Map: The Terraces at Ayala Center Cebu, Cebu Business Park">
+    <svg viewBox="0 0 270 190" role="img" aria-label="Map: Chamber KTV, The Terraces, Ayala Center Cebu, Cebu Business Park">
       <defs>
         <linearGradient id="sky" x1="0" y1="0" x2="0.4" y2="1">
           <stop offset="0" stopColor="#2a0f3d" />
@@ -92,10 +92,21 @@ function VenueMap() {
         <circle cy="-13" r="3" fill="#fff" />
       </g>
       <g style={label}>
-        <rect x="92" y="138" width="124" height="16" rx="2" fill="#ff2f8e" transform="skewX(-12)" />
-        <text x="122" y="150" fill="#fff" fontSize="9">THE TERRACES · PA CEBU</text>
+        <rect x="88" y="138" width="152" height="16" rx="2" fill="#ff2f8e" transform="skewX(-12)" />
+        <text x="116" y="150" fill="#fff" fontSize="9">CHAMBER KTV · THE TERRACES</text>
       </g>
       <text x="262" y="184" fill="#ffffff66" fontSize="6" textAnchor="end" style={label}>CEBU BUSINESS PARK</text>
     </svg>
+  )
+}
+
+// Big venue title pinned to the top-left of the screen.
+export function VenueTitle() {
+  return (
+    <header className="venue-title" aria-label={`${EVENT.venue}, ${EVENT.address}`}>
+      <span className="vt-kicker">PA CEBU LEADERSHIP · YEAR END PARTY</span>
+      <h1>CHAMBER KTV</h1>
+      <span className="vt-sub">THE TERRACES · AYALA CENTER CEBU · DEC 6 · 10PM–1AM</span>
+    </header>
   )
 }

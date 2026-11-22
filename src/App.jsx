@@ -8,6 +8,7 @@ import Room, { H, PZ } from './Room.jsx'
 import Player, { Cinematic } from './Player.jsx'
 import { TouchControls, isTouch } from './touch.jsx'
 import { GuestPanel, RsvpForm, RsvpProvider, rsvpEnabled } from './Rsvp.jsx'
+import { VenueTitle } from './EventInfo.jsx'
 
 const KEYS = [
   { name: 'forward', keys: ['KeyW', 'ArrowUp'] },
@@ -113,6 +114,8 @@ export default function App() {
           </EffectComposer>
         </Canvas>
 
+        <VenueTitle />
+
         {playing && isTouch && !rsvpOpen && !guestsOpen && <TouchControls />}
         {playing && <div className="crosshair" />}
         {(!locked) && (
@@ -129,7 +132,7 @@ export default function App() {
         {!playing && !cinematic && !rsvpOpen && (
           <div className="overlay" onClick={enter}>
             <div className="card" onClick={(e) => e.stopPropagation()}>
-              <h1>LOUNGE WALKTHROUGH</h1>
+              <h1>VENUE WALKTHROUGH</h1>
               {isTouch ? (
                 <table><tbody>
                   <tr><td>LEFT THUMB</td><td>walk</td></tr>
