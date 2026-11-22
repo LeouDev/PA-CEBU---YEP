@@ -114,7 +114,7 @@ export default function App() {
           </EffectComposer>
         </Canvas>
 
-        {!rsvpOpen && <VenueTitle />}
+        {(playing || cinematic) && !rsvpOpen && !guestsOpen && <VenueTitle />}
 
         {playing && isTouch && !rsvpOpen && !guestsOpen && <TouchControls />}
         {playing && <div className="crosshair" />}
