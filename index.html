@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lounge Walkthrough</title>
+    <style>
+      html, body, #root { margin: 0; height: 100%; background: #0b0b0c; overflow: hidden; }
+      body { font-family: ui-monospace, Menlo, monospace; color: #eee; }
+      .overlay { position: fixed; inset: 0; display: grid; place-items: center; background: rgba(8,8,10,.62); backdrop-filter: blur(3px); z-index: 10; }
+      .card { max-width: 420px; padding: 28px 32px; background: rgba(20,18,16,.92); border: 1px solid #5a4a38; border-radius: 6px; text-align: center; }
+      .card h1 { font-size: 18px; letter-spacing: .2em; margin: 0 0 16px; color: #d9b98a; }
+      .card table { margin: 0 auto 20px; font-size: 13px; border-spacing: 12px 4px; text-align: left; }
+      .card td:first-child { color: #d9b98a; text-align: right; }
+      button { font: inherit; font-size: 12px; letter-spacing: .1em; background: #2a241e; color: #eee; border: 1px solid #6b5843; border-radius: 4px; padding: 8px 14px; cursor: pointer; }
+      button:hover { background: #3a3128; }
+      button.primary { background: #b08a58; color: #111; border-color: #b08a58; font-weight: 700; padding: 10px 22px; }
+      .bar { position: fixed; top: 12px; right: 12px; display: flex; gap: 8px; z-index: 20; }
+      .hint { position: fixed; left: 12px; bottom: 12px; font-size: 11px; opacity: .7; z-index: 5; }
+      .crosshair { position: fixed; left: 50%; top: 50%; width: 14px; height: 14px; transform: translate(-50%,-50%); pointer-events: none; z-index: 5; }
+      .crosshair::before, .crosshair::after { content: ''; position: absolute; background: rgba(255,255,255,.85); }
+      .crosshair::before { left: 6px; top: 0; width: 2px; height: 14px; }
+      .crosshair::after { top: 6px; left: 0; height: 2px; width: 14px; }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
