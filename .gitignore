@@ -2,3 +2,5 @@ node_modules
 dist
 .neon
 .env.local
+.vercel
+.env*
