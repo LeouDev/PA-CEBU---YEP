@@ -1,10 +1,10 @@
 import { Suspense, useEffect, useRef, useState } from 'react'
-import { Canvas } from '@react-three/fiber'
+import { Canvas, useThree } from "@react-three/fiber"
 import { Environment, KeyboardControls, Lightformer, PointerLockControls } from '@react-three/drei'
 import { Physics } from '@react-three/rapier'
-import { EffectComposer, Bloom, N8AO, ToneMapping, Vignette } from '@react-three/postprocessing'
+import { EffectComposer, Bloom, ToneMapping, Vignette } from '@react-three/postprocessing'
 import { ToneMappingMode } from 'postprocessing'
-import Room, { H } from './Room.jsx'
+import Room, { H, PZ } from './Room.jsx'
 import Player, { Cinematic } from './Player.jsx'
 
 const KEYS = [
@@ -17,24 +17,31 @@ const KEYS = [
 ]
 
 function Lights() {
-  const spot = (pos, target) => (
+  const gl = useThree((s) => s.gl)
+  // The scene is static, so shadow maps render once instead of every frame.
+  useEffect(() => {
+    gl.shadowMap.autoUpdate = false
+    const ids = [100, 1000, 3000].map((ms) => setTimeout(() => { gl.shadowMap.needsUpdate = true }, ms))
+    return () => ids.forEach(clearTimeout)
+  }, [gl])
+  const spot = (pos, target, shadow, extra = {}) => (
     <spotLight
       position={pos} target-position={target} angle={0.75} penumbra={0.9} intensity={14} distance={8} decay={2}
-      color="#ffd9aa" castShadow shadow-mapSize={[1024, 1024]} shadow-bias={-0.0004} shadow-normalBias={0.02}
+      color="#ffd9aa" castShadow={shadow} shadow-mapSize={[1024, 1024]} shadow-bias={-0.0004} shadow-normalBias={0.02} {...extra}
     />
   )
   return (
     <>
-      <hemisphereLight args={['#5a4c40', '#1a1512', 0.6]} />
-      {spot([0.6, H - 0.05, -1.2], [0.6, 0, -1.4])}
-      {spot([0.3, H - 0.05, -6.6], [0.3, 0, -7.0])}
-      {spot([-1.2, H - 0.05, -2.8], [-2.2, 0.8, -2.2])}
+      <hemisphereLight args={['#5a4c40', '#1a1512', 0.8]} />
+      {spot([0.6, H - 0.05, -1.2], [0.6, 0, -1.4], true)}
+      {spot([0.1, 1.7, PZ], [0.1, 0, PZ], true, { angle: 1.0, intensity: 10, color: '#fff0d8' })}
+      {spot([0.3, H - 0.05, -10.6], [0.3, 0, -11.0], false)}
       {/* reflections only: soft warm panels standing in for the downlights */}
       <Environment resolution={128} frames={1} environmentIntensity={0.35}>
         <color attach="background" args={['#120f0c']} />
         <Lightformer form="rect" intensity={2} color="#ffd8a8" position={[0, 3, -2]} rotation-x={Math.PI / 2} scale={[3, 6, 1]} />
         <Lightformer form="rect" intensity={1.5} color="#40ff80" position={[3, 2.5, 0]} rotation-y={-Math.PI / 2} scale={[6, 0.3, 1]} />
-        <Lightformer form="rect" intensity={1} color="#d0e4ff" position={[0, 2, -8]} scale={[2, 1, 1]} />
+        <Lightformer form="rect" intensity={1} color="#d0e4ff" position={[0, 2, -12]} scale={[2, 1, 1]} />
       </Environment>
     </>
   )
@@ -67,7 +74,7 @@ export default function App() {
       <Canvas
         shadows
         flat
-        dpr={[1, 1.75]}
+        dpr={[1, 1.25]}
         gl={{ antialias: false, powerPreference: 'high-performance' }}
         camera={{ fov: 72, near: 0.05, far: 40, position: [-0.55, 1.6, 0.7] }}
       >
@@ -81,8 +88,7 @@ export default function App() {
         </Suspense>
         {cinematic && <Cinematic />}
         <PointerLockControls ref={controls} selector="#no-auto-lock" onLock={() => setLocked(true)} onUnlock={() => setLocked(false)} />
-        <EffectComposer multisampling={4}>
-          <N8AO aoRadius={0.6} intensity={2.2} distanceFalloff={0.6} halfRes />
+        <EffectComposer multisampling={2}>
           <Bloom mipmapBlur luminanceThreshold={1} intensity={0.6} radius={0.7} />
           <Vignette offset={0.3} darkness={0.55} />
           <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />

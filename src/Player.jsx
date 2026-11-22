@@ -59,8 +59,8 @@ export default function Player({ cinematic, resetKey }) {
 
 // Slow dolly loop through the room for cinematic mode.
 const path = new THREE.CatmullRomCurve3([
-  [0.2, 1.55, 0.85], [-1.0, 1.35, -0.6], [-1.1, 1.6, -3.2], [-0.2, 1.9, -5.4],
-  [1.2, 1.4, -6.0], [-0.9, 1.7, -8.0], [-1.4, 1.2, -5.8], [0.0, 1.0, -3.4], [1.2, 1.3, -0.4],
+  [0.2, 1.55, 0.85], [-1.0, 1.35, -0.6], [-1.3, 1.6, -3.4], [-1.4, 1.5, -6.4], [-0.2, 1.9, -9.0],
+  [1.2, 1.4, -10.0], [-0.9, 1.7, -12.0], [-1.5, 1.2, -9.6], [1.5, 1.4, -7.6], [1.4, 1.2, -4.8], [0.0, 1.0, -3.4], [1.2, 1.3, -0.4],
 ].map((p) => new THREE.Vector3(...p)), true, 'centripetal')
 const look = new THREE.Vector3()
 
@@ -68,7 +68,7 @@ export function Cinematic() {
   const camera = useThree((s) => s.camera)
   const target = useRef(new THREE.Vector3(0, 1.2, -4))
   useFrame(({ clock }, dt) => {
-    const u = (clock.elapsedTime / 70) % 1
+    const u = (clock.elapsedTime / 90) % 1
     path.getPointAt(u, camera.position)
     path.getPointAt((u + 0.06) % 1, look)
     look.y -= 0.35

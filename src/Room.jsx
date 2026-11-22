@@ -5,8 +5,8 @@ import { Instances, Instance, RoundedBox } from '@react-three/drei'
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js'
 import { tex } from './textures.js'
 
-// Room in metres: x -2.2 (wood wall) .. 2.2 (plaster wall), z 1.2 (door) .. -8.6 (back), height 2.65.
-export const W = 4.4, H = 2.65, Z0 = 1.2, Z1 = -8.6
+// Room in metres: x -2.2 (wood wall) .. 2.2 (plaster wall), z 1.2 (door) .. -12.6 (back); z -4.4..-8.4 is the added pool zone, height 2.65.
+export const W = 4.4, H = 2.65, Z0 = 1.2, Z1 = -12.6
 const XL = -W / 2, XR = W / 2, D = Z0 - Z1, ZC = (Z0 + Z1) / 2
 
 function useMaterials() {
@@ -20,8 +20,8 @@ function useMaterials() {
     plaster: new THREE.MeshStandardMaterial({ color: '#cfc8bd', roughness: 0.92 }),
     ceiling: new THREE.MeshStandardMaterial({ color: '#2b2a2b', roughness: 0.9 }),
     shell: new THREE.MeshStandardMaterial({ color: '#1c1b1b', roughness: 0.9 }),
-    leather: new THREE.MeshPhysicalMaterial({ color: '#b8874a', roughness: 0.42, clearcoat: 0.35, clearcoatRoughness: 0.4, sheen: 0.3, sheenColor: '#e8c08a' }),
-    leatherBrown: new THREE.MeshPhysicalMaterial({ color: '#5a2c1c', roughness: 0.45, clearcoat: 0.3 }),
+    leather: new THREE.MeshStandardMaterial({ color: "#b8874a", roughness: 0.42 }),
+    leatherBrown: new THREE.MeshStandardMaterial({ color: "#5a2c1c", roughness: 0.45 }),
     blackLeather: new THREE.MeshStandardMaterial({ color: '#141414', roughness: 0.5 }),
     chrome: new THREE.MeshStandardMaterial({ color: '#d0d0d0', metalness: 1, roughness: 0.18 }),
     black: new THREE.MeshStandardMaterial({ color: '#0d0d0e', roughness: 0.6 }),
@@ -130,9 +130,9 @@ function AcousticPanels({ M }) {
       const w = len / cols
       for (let c = 0; c < cols; c++) for (let r = 0; r < rows; r++) out.push(place(c * w + w / 2, r * h + h / 2, w, h))
     }
-    run(-4.3 - Z1, 6, (a, y, w, h) => ({ p: [XL + 0.03, y, -4.3 - a], r: Math.PI / 2, s: [w - 0.02, h - 0.02, 1] }))
+    run(-4.3 - Z1, 12, (a, y, w, h) => ({ p: [XL + 0.03, y, -4.3 - a], r: Math.PI / 2, s: [w - 0.02, h - 0.02, 1] }))
     run(W, 6, (a, y, w, h) => ({ p: [XL + a, y, Z1 + 0.03], r: 0, s: [w - 0.02, h - 0.02, 1] }))
-    run(-5 - Z1, 5, (a, y, w, h) => ({ p: [XR - 0.03, y, -5 - a], r: -Math.PI / 2, s: [w - 0.02, h - 0.02, 1] }))
+    run(-5 - Z1, 11, (a, y, w, h) => ({ p: [XR - 0.03, y, -5 - a], r: -Math.PI / 2, s: [w - 0.02, h - 0.02, 1] }))
     return out
   }, [])
   return (
@@ -201,7 +201,7 @@ function ProjectorScreen({ M }) {
     </mesh>
   )
   return (
-    <group position={[-0.75, 0, -4.7]} rotation-y={-0.22}>
+    <group position={[-0.75, 0, -8.7]} rotation-y={-0.22}>
       <RigidBody type="fixed" colliders={false}>
         <CuboidCollider args={[0.6, 1.0, 0.18]} position={[0, 1.0, 0]} />
       </RigidBody>
@@ -241,7 +241,7 @@ function Chair({ M, position, rot }) {
 }
 
 function MeetingArea({ M }) {
-  const cx = 0.3, cz = -7.0
+  const cx = 0.3, cz = -11.0
   const chairs = [
     ...[-0.62, 0, 0.62].map((dz) => [[cx - 0.72, 0, cz + dz], Math.PI / 2]),
     ...[-0.62, 0, 0.62].map((dz) => [[cx + 0.72, 0, cz + dz], -Math.PI / 2]),
@@ -271,7 +271,7 @@ function MeetingArea({ M }) {
       ))}
       {/* subwoofer next to the screen */}
       <RigidBody type="fixed" colliders="cuboid">
-        <B from={[-1.5, 0, -4.85]} to={[-1.05, 0.48, -5.3]} m={M.black} />
+        <B from={[-1.5, 0, -8.85]} to={[-1.05, 0.48, -9.3]} m={M.black} />
       </RigidBody>
     </group>
   )
@@ -284,7 +284,7 @@ function Neon({ M }) {
     return new THREE.TubeGeometry(curve, 120, 0.013, 8)
   }, [])
   return (
-    <group position={[0.4, 1.9, -7.3]} scale={1.6}>
+    <group position={[0.4, 1.9, -11.3]} scale={1.6}>
       <mesh geometry={geo} material={M.neon} />
       {[-0.35, 0.35].map((x) => (
         <mesh key={x} position={[x, 0.36, 0]} material={M.black}>
@@ -296,7 +296,87 @@ function Neon({ M }) {
   )
 }
 
-const DOWNLIGHTS = [[-0.9, -0.6], [0.9, -1.4], [-0.6, -3.6], [1.0, -3.9], [-0.7, -6.0], [1.1, -6.2], [-0.5, -7.9], [1.1, -8.0]]
+// Regulation 8 ft table (2.54 x 1.27 m play area) with a hanging billiard lamp.
+const BALLS = ['#f2c200', '#1d3f9e', '#c8201c', '#4b1d7a', '#e86a10', '#106030', '#7a1a12', '#111111']
+export const PZ = -6.4
+function PoolArea({ M }) {
+  const felt = useMemo(() => new THREE.MeshStandardMaterial({ color: '#1d5e3a', roughness: 1 }), [])
+  const shade = useMemo(() => new THREE.MeshStandardMaterial({ color: "#123d26", roughness: 0.5, side: THREE.DoubleSide }), [])
+  const balls = useMemo(() => {
+    const r = 0.0286, out = []
+    let k = 0
+    for (let row = 0; row < 5; row++) for (let j = 0; j <= row; j++) {
+      const n = k++
+      out.push({ p: [(j - row / 2) * 2.02 * r, 0.795 + r, PZ - 0.6 - row * 1.75 * r], color: BALLS[n % 8], stripe: n >= 8 })
+    }
+    out.push({ p: [0.05, 0.795 + r, PZ + 0.64], color: '#f5f2e8' })
+    return out
+  }, [])
+  const ballMats = useMemo(() => Object.fromEntries([...BALLS, '#f5f2e8'].map((c) => [c, new THREE.MeshPhysicalMaterial({ color: c, roughness: 0.15, clearcoat: 1 })])), [])
+  const rail = 0.115, ow = 1.27 / 2 + rail, ol = 2.54 / 2 + rail
+  return (
+    <group position={[0.1, 0, 0]}>
+      <RigidBody type="fixed" colliders={false}>
+        <CuboidCollider args={[ow, 0.42, ol]} position={[0, 0.42, PZ]} />
+      </RigidBody>
+      <B from={[-ow, 0.6, PZ - ol]} to={[ow, 0.78, PZ + ol]} m={M.walnut} />
+      <B from={[-0.635, 0.78, PZ - 1.27]} to={[0.635, 0.795, PZ + 1.27]} m={felt} />
+      {/* felt cushions + wooden top rails */}
+      {[-1, 1].map((s) => (
+        <group key={s}>
+          <B from={[s * 0.635, 0.78, PZ - 1.27]} to={[s * 0.595, 0.835, PZ + 1.27]} m={felt} />
+          <B from={[s * ow, 0.78, PZ - ol]} to={[s * 0.635, 0.845, PZ + ol]} m={M.rosewood} />
+          <B from={[-0.635, 0.78, PZ + s * ol]} to={[0.635, 0.845, PZ + s * 1.27]} m={M.rosewood} />
+          <B from={[-0.635, 0.78, PZ + s * 1.27]} to={[0.635, 0.835, PZ + s * 1.23]} m={felt} />
+        </group>
+      ))}
+      {[[-1, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [1, 1]].map(([sx, sz]) => (
+        <mesh key={`${sx}${sz}`} position={[sx * 0.62, 0.848, PZ + sz * 1.255]} material={M.black}>
+          <cylinderGeometry args={[0.058, 0.058, 0.01, 20]} />
+        </mesh>
+      ))}
+      {[[-1, -1], [1, -1], [-1, 1], [1, 1]].map(([sx, sz]) => (
+        <B key={`${sx}${sz}`} from={[sx * 0.55, 0, PZ + sz * 1.15]} to={[sx * 0.7, 0.6, PZ + sz * 1.3]} m={M.walnutDark} />
+      ))}
+      <B from={[-0.5, 0.06, PZ - 1.1]} to={[0.5, 0.12, PZ + 1.1]} m={M.walnutDark} />
+      {balls.map((b, i) => (
+        <group key={i} position={b.p}>
+          <mesh material={ballMats[b.color]} castShadow>
+            <sphereGeometry args={[0.0286, 20, 14]} />
+          </mesh>
+          {b.stripe && (
+            <mesh material={M.white} scale={[1.01, 0.5, 1.01]}>
+              <sphereGeometry args={[0.0286, 20, 8]} />
+            </mesh>
+          )}
+        </group>
+      ))}
+      {/* cue resting on the felt */}
+      <mesh position={[0.4, 0.81, PZ + 0.2]} rotation={[Math.PI / 2, 0, 0.18]} material={M.oak} castShadow>
+        <cylinderGeometry args={[0.006, 0.014, 1.45, 10]} />
+      </mesh>
+      {/* billiard lamp: three shades on a bar */}
+      <B from={[-0.04, 1.86, PZ - 0.85]} to={[0.04, 1.9, PZ + 0.85]} m={M.black} />
+      {[-0.6, 0, 0.6].map((dz) => (
+        <group key={dz} position={[0, 1.78, PZ + dz]}>
+          <mesh material={shade}>
+            <cylinderGeometry args={[0.07, 0.2, 0.16, 24, 1, true]} />
+          </mesh>
+          <mesh position={[0, -0.04, 0]} rotation-x={Math.PI / 2} material={M.downlight}>
+            <circleGeometry args={[0.07, 20]} />
+          </mesh>
+        </group>
+      ))}
+      {[-0.8, 0.8].map((dz) => (
+        <mesh key={dz} position={[0, 2.27, PZ + dz]} material={M.black}>
+          <cylinderGeometry args={[0.004, 0.004, 0.75]} />
+        </mesh>
+      ))}
+    </group>
+  )
+}
+
+const DOWNLIGHTS =[[-0.9, -0.6], [0.9, -1.4], [-0.6, -3.6], [1.0, -3.9], [-1.3, -5.3], [1.4, -7.5], [-0.7, -10.0], [1.1, -10.2], [-0.5, -11.9], [1.1, -12.0]]
 
 function Ceiling({ M }) {
   return (
@@ -305,29 +385,30 @@ function Ceiling({ M }) {
       <B from={[1.55, H - 0.18, Z0]} to={[XR, H, -5.0]} m={M.ceiling} shadow={false} />
       <B from={[1.53, H - 0.185, Z0]} to={[1.56, H - 0.17, -5.0]} m={M.green} shadow={false} />
       <B from={[XL, H - 0.012, -4.55]} to={[1.55, H - 0.005, -4.6]} m={M.green} shadow={false} />
-      {[0.8, -1.6, -4.0].map((z) => (
-        <pointLight key={z} color="#29ff6a" intensity={0.9} distance={3} decay={2} position={[1.4, H - 0.25, z]} />
+      {[-1.6].map((z) => (
+        <pointLight key={z} color="#29ff6a" intensity={2} distance={4} decay={2} position={[1.4, H - 0.25, z]} />
       ))}
       {/* AC cassette */}
-      <B from={[-0.08, H - 0.05, -4.98]} to={[0.72, H, -5.78]} m={M.plastic} />
+      <B from={[-0.08, H - 0.05, -8.98]} to={[0.72, H, -9.78]} m={M.plastic} />
       {[0, 1, 2, 3].map((i) => {
         const horiz = i < 2
         const off = i % 2 ? 0.3 : -0.3
         return horiz
-          ? <B key={i} from={[0.07, H - 0.052, -5.38 + off - 0.03]} to={[0.57, H - 0.05, -5.38 + off + 0.03]} m={M.shell} shadow={false} />
-          : <B key={i} from={[0.32 + off - 0.03, H - 0.052, -5.13]} to={[0.32 + off + 0.03, H - 0.05, -5.63]} m={M.shell} shadow={false} />
+          ? <B key={i} from={[0.07, H - 0.052, -9.38 + off - 0.03]} to={[0.57, H - 0.05, -9.38 + off + 0.03]} m={M.shell} shadow={false} />
+          : <B key={i} from={[0.32 + off - 0.03, H - 0.052, -9.13]} to={[0.32 + off + 0.03, H - 0.05, -9.63]} m={M.shell} shadow={false} />
       })}
       {/* smoke detector, wall speaker */}
       <mesh position={[0.6, H - 0.02, -2.2]} material={M.plastic}>
         <cylinderGeometry args={[0.06, 0.07, 0.04, 20]} />
       </mesh>
       <B from={[1.75, 2.18, 0.9]} to={[2.15, 2.42, 0.5]} m={M.black} />
-      {DOWNLIGHTS.map(([x, z]) => (
+      {DOWNLIGHTS.map(([x, z], i) => (
         <group key={`${x}${z}`} position={[x, H - 0.003, z]}>
           <mesh rotation-x={Math.PI / 2} material={M.downlight}>
             <circleGeometry args={[0.045, 20]} />
           </mesh>
-          <pointLight color="#ffd6a3" intensity={3.6} distance={5.5} decay={2} position={[0, -0.15, 0]} />
+          {/* every other fixture gets a real light: per-pixel cost scales with light count */}
+          {i % 2 === 0 && <pointLight color="#ffd6a3" intensity={6} distance={6} decay={2} position={[0, -0.15, 0]} />}
         </group>
       ))}
     </group>
@@ -343,6 +424,7 @@ export default function Room() {
       <AcousticPanels M={M} />
       <Sofa M={M} />
       <CoffeeArea M={M} />
+      <PoolArea M={M} />
       <ProjectorScreen M={M} />
       <MeetingArea M={M} />
       <Neon M={M} />
