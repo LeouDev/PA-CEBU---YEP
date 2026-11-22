@@ -1,11 +1,13 @@
 import { Suspense, useEffect, useRef, useState } from 'react'
-import { Canvas, useThree } from "@react-three/fiber"
+import { Canvas, useThree } from '@react-three/fiber'
 import { Environment, KeyboardControls, Lightformer, PointerLockControls } from '@react-three/drei'
 import { Physics } from '@react-three/rapier'
 import { EffectComposer, Bloom, ToneMapping, Vignette } from '@react-three/postprocessing'
 import { ToneMappingMode } from 'postprocessing'
 import Room, { H, PZ } from './Room.jsx'
 import Player, { Cinematic } from './Player.jsx'
+import { TouchControls, isTouch } from './touch.jsx'
+import { GuestPanel, RsvpForm, RsvpProvider, rsvpEnabled } from './Rsvp.jsx'
 
 const KEYS = [
   { name: 'forward', keys: ['KeyW', 'ArrowUp'] },
@@ -53,14 +55,29 @@ export default function App() {
   const [started, setStarted] = useState(false)
   const [cinematic, setCinematic] = useState(false)
   const [resetKey, setResetKey] = useState(0)
+  const [rsvpOpen, setRsvpOpen] = useState(false)
+  const [guestsOpen, setGuestsOpen] = useState(false)
+  // Phones have no pointer lock: once started, touch controls drive the camera.
+  const playing = locked || (isTouch && started && !cinematic)
 
-  const enter = () => { document.activeElement?.blur(); setCinematic(false); setStarted(true); controls.current?.lock() }
-  const fullscreen = () => (document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen())
+  const enter = () => {
+    document.activeElement?.blur()
+    setCinematic(false)
+    setStarted(true)
+    if (!isTouch) controls.current?.lock()
+  }
+  const fullscreen = () => {
+    const d = document
+    if (d.fullscreenElement) d.exitFullscreen?.()
+    else d.documentElement.requestFullscreen?.().catch(() => {}) // iPhone Safari has no Fullscreen API
+  }
   const reset = () => { setCinematic(false); setResetKey((k) => k + 1) }
   const toggleCinematic = () => setCinematic((c) => { if (!c) controls.current?.unlock(); return !c })
+  const openRsvp = () => { controls.current?.unlock(); setGuestsOpen(false); setRsvpOpen(true) }
 
   useEffect(() => {
     const onKey = (e) => {
+      if (e.target.closest?.('input, select, textarea')) return
       if (e.code === 'KeyF') fullscreen()
       if (e.code === 'KeyR') reset()
       if (e.code === 'KeyC') toggleCinematic()
@@ -70,58 +87,76 @@ export default function App() {
   }, [])
 
   return (
-    <KeyboardControls map={KEYS}>
-      <Canvas
-        shadows
-        flat
-        dpr={[1, 1.25]}
-        gl={{ antialias: false, powerPreference: 'high-performance' }}
-        camera={{ fov: 72, near: 0.05, far: 40, position: [-0.55, 1.6, 0.7] }}
-      >
-        <color attach="background" args={['#0b0b0c']} />
-        <Suspense fallback={null}>
-          <Physics timeStep="vary">
-            <Room />
-            <Player cinematic={cinematic} resetKey={resetKey} />
-          </Physics>
-          <Lights />
-        </Suspense>
-        {cinematic && <Cinematic />}
-        <PointerLockControls ref={controls} selector="#no-auto-lock" onLock={() => setLocked(true)} onUnlock={() => setLocked(false)} />
-        <EffectComposer multisampling={2}>
-          <Bloom mipmapBlur luminanceThreshold={1} intensity={0.6} radius={0.7} />
-          <Vignette offset={0.3} darkness={0.55} />
-          <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
-        </EffectComposer>
-      </Canvas>
+    <RsvpProvider>
+      <KeyboardControls map={KEYS}>
+        <Canvas
+          shadows
+          flat
+          dpr={isTouch ? 1 : [1, 1.25]}
+          gl={{ antialias: false, powerPreference: 'high-performance' }}
+          camera={{ fov: isTouch ? 78 : 72, near: 0.05, far: 40, position: [-0.55, 1.6, 0.7] }}
+        >
+          <color attach="background" args={['#0b0b0c']} />
+          <Suspense fallback={null}>
+            <Physics timeStep="vary">
+              <Room />
+              <Player cinematic={cinematic} resetKey={resetKey} />
+            </Physics>
+            <Lights />
+          </Suspense>
+          {cinematic && <Cinematic />}
+          {!isTouch && <PointerLockControls ref={controls} selector="#no-auto-lock" onLock={() => setLocked(true)} onUnlock={() => setLocked(false)} />}
+          <EffectComposer multisampling={isTouch ? 0 : 2}>
+            <Bloom mipmapBlur luminanceThreshold={1} intensity={0.6} radius={0.7} />
+            <Vignette offset={0.3} darkness={0.55} />
+            <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
+          </EffectComposer>
+        </Canvas>
 
-      {locked && <div className="crosshair" />}
-      {!locked && (
-        <div className="bar">
-          <button onClick={fullscreen}>FULLSCREEN</button>
-          <button onClick={reset}>RESET CAMERA</button>
-          <button onClick={toggleCinematic}>{cinematic ? 'EXIT CINEMATIC' : 'CINEMATIC'}</button>
-        </div>
-      )}
-      <div className="hint">WASD move · Shift run · Space jump · Mouse look · F fullscreen · R reset · C cinematic · Esc release mouse</div>
-      {!locked && !cinematic && (
-        <div className="overlay" onClick={enter}>
-          <div className="card" onClick={(e) => e.stopPropagation()}>
-            <h1>LOUNGE WALKTHROUGH</h1>
-            <table><tbody>
-              <tr><td>W A S D</td><td>walk</td></tr>
-              <tr><td>SHIFT</td><td>run</td></tr>
-              <tr><td>SPACE</td><td>jump</td></tr>
-              <tr><td>MOUSE</td><td>look around</td></tr>
-              <tr><td>C</td><td>cinematic camera</td></tr>
-              <tr><td>R</td><td>reset camera</td></tr>
-              <tr><td>F</td><td>fullscreen</td></tr>
-              <tr><td>ESC</td><td>release mouse</td></tr>
-            </tbody></table>
-            <button className="primary" onClick={enter}>{started ? 'RESUME' : 'CLICK TO ENTER'}</button>
+        {playing && isTouch && !rsvpOpen && !guestsOpen && <TouchControls />}
+        {playing && <div className="crosshair" />}
+        {(!locked) && (
+          <div className="bar">
+            {rsvpEnabled && <button className="guests-toggle" onClick={() => setGuestsOpen((o) => !o)}>GUESTS</button>}
+            {rsvpEnabled && <button className="primary" onClick={openRsvp}>RSVP</button>}
+            {document.fullscreenEnabled && <button onClick={fullscreen}>FULLSCREEN</button>}
+            <button onClick={reset}>RESET</button>
+            <button onClick={toggleCinematic}>{cinematic ? 'EXIT CINEMATIC' : 'CINEMATIC'}</button>
           </div>
-        </div>
-      )}
-    </KeyboardControls>
+        )}
+        <GuestPanel open={guestsOpen} onClose={() => setGuestsOpen(false)} onRsvp={openRsvp} />
+        {!isTouch && <div className="hint">WASD move · Shift run · Space jump · Mouse look · F fullscreen · R reset · C cinematic · Esc release mouse</div>}
+        {!playing && !cinematic && !rsvpOpen && (
+          <div className="overlay" onClick={enter}>
+            <div className="card" onClick={(e) => e.stopPropagation()}>
+              <h1>LOUNGE WALKTHROUGH</h1>
+              {isTouch ? (
+                <table><tbody>
+                  <tr><td>LEFT THUMB</td><td>walk</td></tr>
+                  <tr><td>RIGHT THUMB</td><td>look around</td></tr>
+                  <tr><td>JUMP</td><td>jump</td></tr>
+                </tbody></table>
+              ) : (
+                <table><tbody>
+                  <tr><td>W A S D</td><td>walk</td></tr>
+                  <tr><td>SHIFT</td><td>run</td></tr>
+                  <tr><td>SPACE</td><td>jump</td></tr>
+                  <tr><td>MOUSE</td><td>look around</td></tr>
+                  <tr><td>C</td><td>cinematic camera</td></tr>
+                  <tr><td>R</td><td>reset camera</td></tr>
+                  <tr><td>F</td><td>fullscreen</td></tr>
+                  <tr><td>ESC</td><td>release mouse</td></tr>
+                </tbody></table>
+              )}
+              <div className="row">
+                {rsvpEnabled && <button onClick={openRsvp}>RSVP TO THE PARTY</button>}
+                <button className="primary" onClick={enter}>{started ? 'RESUME' : isTouch ? 'TAP TO ENTER' : 'CLICK TO ENTER'}</button>
+              </div>
+            </div>
+          </div>
+        )}
+        {rsvpOpen && <RsvpForm onClose={() => setRsvpOpen(false)} />}
+      </KeyboardControls>
+    </RsvpProvider>
   )
 }

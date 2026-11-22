@@ -3,10 +3,12 @@ import * as THREE from 'three'
 import { useFrame, useThree } from '@react-three/fiber'
 import { useKeyboardControls } from '@react-three/drei'
 import { RigidBody, CapsuleCollider, useRapier } from '@react-three/rapier'
+import { touch } from './touch.jsx'
 
 export const SPAWN = [-0.55, 0.85, 0.7]
 const WALK = 2.6, RUN = 4.2, JUMP = 4.0, EYE = 0.72
 const fwd = new THREE.Vector3(), side = new THREE.Vector3(), want = new THREE.Vector3(), UP = new THREE.Vector3(0, 1, 0)
+const DOWN = { x: 0, y: -1, z: 0 }, linvel = { x: 0, y: 0, z: 0 }, euler = new THREE.Euler(0, 0, 0, 'YXZ')
 
 export default function Player({ cinematic, resetKey }) {
   const body = useRef()
@@ -15,6 +17,7 @@ export default function Player({ cinematic, resetKey }) {
   const [, keys] = useKeyboardControls()
   const { rapier, world } = useRapier()
   const camera = useThree((s) => s.camera)
+  const ray = useRef(new rapier.Ray({ x: 0, y: 0, z: 0 }, DOWN))
 
   useEffect(() => {
     const b = body.current
@@ -35,14 +38,29 @@ export default function Player({ cinematic, resetKey }) {
     fwd.normalize()
     side.crossVectors(fwd, UP)
     want.set(0, 0, 0)
-    if (!cinematic) want.addScaledVector(fwd, +forward - +backward).addScaledVector(side, +right - +left)
-    if (want.lengthSq() > 0) want.normalize().multiplyScalar(run ? RUN : WALK)
+    if (!cinematic) {
+      want.addScaledVector(fwd, +forward - +backward - touch.y).addScaledVector(side, +right - +left + touch.x)
+      if (touch.lookX || touch.lookY) {
+        euler.setFromQuaternion(camera.quaternion, 'YXZ')
+        euler.y -= touch.lookX * 0.005
+        euler.x = Math.max(-1.45, Math.min(1.45, euler.x - touch.lookY * 0.005))
+        camera.quaternion.setFromEuler(euler)
+        touch.lookX = touch.lookY = 0
+      }
+    }
+    // keys give full speed; the joystick scales with how far it is pushed
+    const len = want.length()
+    if (len > 0) want.multiplyScalar(Math.min(len, 1) / len * (run ? RUN : WALK))
     vel.current.lerp(want, 1 - Math.exp(-10 * dt))
 
     const t = b.translation()
-    const hit = world.castRay(new rapier.Ray(t, { x: 0, y: -1, z: 0 }), 0.86, true, undefined, undefined, undefined, b)
+    ray.current.origin = t
+    const hit = world.castRay(ray.current, 0.86, true, undefined, undefined, undefined, b)
     const lv = b.linvel()
-    b.setLinvel({ x: vel.current.x, y: jump && hit && !cinematic ? JUMP : lv.y, z: vel.current.z }, true)
+    linvel.x = vel.current.x
+    linvel.y = (jump || touch.jump) && hit && !cinematic ? JUMP : lv.y
+    linvel.z = vel.current.z
+    b.setLinvel(linvel, true)
 
     if (cinematic) return
     const speed = Math.hypot(vel.current.x, vel.current.z)

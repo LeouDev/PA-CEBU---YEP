@@ -58,7 +58,7 @@ function fabric() {
   })
 }
 
-const canvases = {}
+const canvases = {}, textures = {}
 const sources = {
   walnut: () => wood([92, 62, 42], 0.22, 40),
   rosewood: () => wood([112, 62, 38], 0.22, 70),
@@ -68,6 +68,8 @@ const sources = {
 }
 
 export function tex(name, rx = 1, ry = 1, rotate = false) {
+  const key = `${name}|${rx}|${ry}|${rotate}`
+  if (textures[key]) return textures[key] // one GPU upload per distinct texture
   canvases[name] ??= sources[name]()
   const t = new THREE.CanvasTexture(canvases[name])
   t.wrapS = t.wrapT = THREE.RepeatWrapping
@@ -75,5 +77,5 @@ export function tex(name, rx = 1, ry = 1, rotate = false) {
   if (rotate) { t.rotation = Math.PI / 2; t.center.set(0.5, 0.5) }
   t.colorSpace = THREE.SRGBColorSpace
   t.anisotropy = 8
-  return t
+  return (textures[key] = t)
 }
