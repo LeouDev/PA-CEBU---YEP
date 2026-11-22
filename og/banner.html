@@ -1,0 +1,115 @@
+<!doctype html>
+<!-- Source for public/og.png (1200x630). Render: see og/render.sh -->
+<html>
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Oswald:wght@500;700&display=block" rel="stylesheet">
+<style>
+  html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; background: #12081f; }
+  .art { position: absolute; inset: 0; }
+  .copy { position: absolute; left: 64px; top: 58px; width: 700px; }
+  .kicker { font: 700 22px/1 Oswald, sans-serif; letter-spacing: .32em; color: #ffd3a1; text-shadow: 0 2px 10px rgba(0,0,0,.6); }
+  h1 { margin: 26px 0 0; font: 400 132px/.86 Anton, Impact, sans-serif; text-transform: uppercase; letter-spacing: .005em;
+       transform: skewX(-9deg); transform-origin: left bottom; color: #fff;
+       text-shadow: 6px 6px 0 #ff2f8e, 12px 12px 0 rgba(26,8,40,.85); }
+  h1 span { display: block; }
+  h1 .pink { color: #ffe36e; }
+  .when { margin-top: 30px; font: 700 26px/1.25 Oswald, sans-serif; color: #fff; letter-spacing: .04em; text-shadow: 0 2px 10px rgba(0,0,0,.8); }
+  .when b { color: #5be3ff; }
+  .cta { position: absolute; left: 64px; bottom: 54px; display: flex; align-items: center; gap: 22px; }
+  .btn { transform: skewX(-12deg); background: #ff2f8e; padding: 14px 34px; box-shadow: 8px 8px 0 #1a0828; }
+  .btn span { display: block; transform: skewX(12deg); font: 400 44px/1 Anton, Impact, sans-serif; color: #fff; letter-spacing: .04em; }
+  .url { font: 700 22px/1 Oswald, sans-serif; color: #ffd3a1; letter-spacing: .12em; text-shadow: 0 2px 8px rgba(0,0,0,.9); }
+  .tag { position: absolute; right: 40px; top: 40px; transform: rotate(4deg); border: 3px solid #fff; padding: 8px 14px;
+         font: 700 18px/1 Oswald, sans-serif; letter-spacing: .22em; color: #fff; background: rgba(18,8,31,.55); }
+</style>
+</head>
+<body>
+<svg class="art" viewBox="0 0 1200 630" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1c0b33"/>
+      <stop offset=".38" stop-color="#5b1a6e"/>
+      <stop offset=".62" stop-color="#d9367f"/>
+      <stop offset=".8" stop-color="#ff8a3d"/>
+      <stop offset="1" stop-color="#ffc061"/>
+    </linearGradient>
+    <linearGradient id="sun" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffe36e"/>
+      <stop offset="1" stop-color="#ff3d7a"/>
+    </linearGradient>
+    <linearGradient id="fade" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#12081f" stop-opacity=".82"/>
+      <stop offset=".55" stop-color="#12081f" stop-opacity=".35"/>
+      <stop offset="1" stop-color="#12081f" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ff6a6a"/>
+      <stop offset="1" stop-color="#1c0b33"/>
+    </linearGradient>
+    <mask id="sunStripes">
+      <rect width="1200" height="630" fill="#fff"/>
+      <g fill="#000">
+        <rect x="0" y="372" width="1200" height="5"/><rect x="0" y="392" width="1200" height="7"/>
+        <rect x="0" y="414" width="1200" height="9"/><rect x="0" y="438" width="1200" height="11"/>
+      </g>
+    </mask>
+  </defs>
+  <rect width="1200" height="630" fill="url(#sky)"/>
+  <!-- stars -->
+  <g fill="#fff" opacity=".6">
+    <circle cx="620" cy="40" r="1.4"/><circle cx="760" cy="90" r="1"/><circle cx="1010" cy="60" r="1.6"/>
+    <circle cx="1130" cy="140" r="1"/><circle cx="900" cy="30" r="1.1"/><circle cx="540" cy="120" r="1"/>
+  </g>
+  <!-- striped sun -->
+  <circle cx="905" cy="365" r="185" fill="url(#sun)" mask="url(#sunStripes)"/>
+  <!-- skyline -->
+  <g fill="#2a0d3d">
+    <path d="M520 470 V400 h26 v-36 h18 v36 h20 V330 h34 v-22 h8 v22 h22 V470 Z"/>
+    <path d="M650 470 V350 h30 V300 h12 v-28 h6 v28 h12 v50 h26 V470 Z"/>
+    <path d="M760 470 V380 h40 V340 h36 v130 Z"/>
+    <path d="M850 470 V260 h18 v-40 h8 v40 h18 v210 Z"/>
+    <path d="M915 470 V320 h44 v-24 h14 v24 h18 v150 Z"/>
+    <path d="M1000 470 V360 h30 v-50 h40 v160 Z"/>
+    <path d="M1080 470 V390 h50 v-30 h70 v110 Z"/>
+  </g>
+  <g fill="#ffd36e" opacity=".75">
+    <rect x="864" y="290" width="4" height="6"/><rect x="876" y="310" width="4" height="6"/><rect x="864" y="340" width="4" height="6"/>
+    <rect x="930" y="340" width="5" height="6"/><rect x="946" y="360" width="5" height="6"/><rect x="1012" y="380" width="5" height="6"/>
+    <rect x="664" y="370" width="4" height="6"/><rect x="684" y="330" width="4" height="6"/><rect x="560" y="350" width="4" height="6"/>
+  </g>
+  <!-- water with sun reflection -->
+  <rect y="470" width="1200" height="160" fill="url(#water)" opacity=".9"/>
+  <g fill="#ffe36e" opacity=".55">
+    <rect x="800" y="486" width="210" height="4" rx="2"/><rect x="830" y="504" width="150" height="4" rx="2"/>
+    <rect x="850" y="524" width="110" height="3" rx="1.5"/><rect x="870" y="544" width="70" height="3" rx="1.5"/>
+  </g>
+  <!-- palms -->
+  <g fill="#14061f">
+    <path d="M1105 630 C1100 520 1092 430 1070 330 L1080 328 C1104 430 1116 520 1122 630 Z"/>
+    <path d="M1072 334 C1020 300 980 310 950 340 C990 318 1030 320 1072 340 Z"/>
+    <path d="M1072 334 C1040 280 1000 262 960 268 C1004 282 1036 300 1068 342 Z"/>
+    <path d="M1074 332 C1090 280 1130 260 1170 266 C1130 284 1100 306 1080 342 Z"/>
+    <path d="M1074 334 C1120 310 1170 318 1200 350 C1160 330 1116 330 1078 344 Z"/>
+    <path d="M1074 332 C1060 290 1066 254 1090 230 C1080 262 1080 296 1082 338 Z"/>
+    <path d="M1180 630 C1178 560 1172 500 1160 440 L1168 438 C1182 500 1188 560 1192 630 Z"/>
+    <path d="M1162 444 C1130 420 1100 424 1080 444 C1110 432 1136 434 1162 452 Z"/>
+    <path d="M1164 442 C1190 418 1214 420 1230 436 C1206 432 1186 440 1168 454 Z"/>
+    <path d="M1164 442 C1156 410 1166 390 1186 378 C1176 400 1174 420 1170 450 Z"/>
+  </g>
+  <!-- readability fade behind copy -->
+  <rect width="1200" height="630" fill="url(#fade)"/>
+</svg>
+
+<div class="tag">LEADERSHIP · YEP 2026</div>
+<div class="copy">
+  <div class="kicker">PA CEBU LEADERSHIP PRESENTS</div>
+  <h1><span>Year End</span><span class="pink">Party</span></h1>
+  <div class="when">SUN · DEC 6, 2026 · <b>10 PM – 1 AM</b><br>THE TERRACES, AYALA CENTER CEBU</div>
+</div>
+<div class="cta">
+  <div class="btn"><span>REGISTER NOW</span></div>
+  <div class="url">PA-CEBU-YEP.VERCEL.APP</div>
+</div>
+</body>
+</html>
