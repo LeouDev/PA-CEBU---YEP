@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import * as THREE from 'three'
 import { RigidBody, CuboidCollider } from '@react-three/rapier'
-import { Instances, Instance, RoundedBox } from '@react-three/drei'
+import { Instances, Instance, RoundedBox, useTexture } from '@react-three/drei'
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js'
 import { tex } from './textures.js'
 
@@ -101,6 +101,7 @@ function WoodWall({ M }) {
       <mesh position={[XL + 0.345, 1.43, -1.9]} rotation-y={Math.PI / 2} material={M.screen}>
         <planeGeometry args={[1.1, 0.64]} />
       </mesh>
+      <TvPicture position={[XL + 0.347, 1.43, -1.9]} />
       {/* curved console shelves */}
       {[0.32, 0.6].map((y) => (
         <mesh key={y} position={[XL + 0.24, y, -1.9]} scale={[1, 1, 2.1]} material={M.walnut} castShadow receiveShadow>
@@ -430,5 +431,20 @@ export default function Room() {
       <Neon M={M} />
       <Ceiling M={M} />
     </group>
+  )
+}
+
+// Team photo on the TV, fitted to the screen height (black bars at the sides) so nobody is cropped.
+function TvPicture({ position }) {
+  const map = useTexture('./tv.webp')
+  map.colorSpace = THREE.SRGBColorSpace
+  map.anisotropy = 8
+  const h = 0.64, w = Math.min(1.1, (h * map.image.width) / map.image.height)
+  return (
+    <mesh position={position} rotation-y={Math.PI / 2}>
+      <planeGeometry args={[w, h]} />
+      {/* unlit so it reads as a lit screen; kept at 1.0 so white areas do not bloom */}
+      <meshBasicMaterial map={map} toneMapped={false} />
+    </mesh>
   )
 }

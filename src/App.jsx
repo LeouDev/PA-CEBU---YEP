@@ -92,6 +92,7 @@ export default function App() {
       <KeyboardControls map={KEYS}>
         <Canvas
           shadows
+          onCreated={(s) => { if (import.meta.env.DEV) window.__r3f = s }}
           flat
           dpr={isTouch ? 1 : [1, 1.25]}
           gl={{ antialias: false, powerPreference: 'high-performance' }}
